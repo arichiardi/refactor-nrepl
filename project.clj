@@ -44,8 +44,7 @@
                                      [org.clojure/clojure "1.11.0-master-SNAPSHOT" :classifier "sources"]]}
 
              :lein-plugin {:source-paths ["lein-plugin"]}
-             :test {:dependencies [[print-foo "1.0.2"]]
-                    :src-paths ["test-resources"]}
+             :test {:dependencies [[print-foo "1.0.2"]]}
              :dev {:global-vars {*warn-on-reflection* true}
                    :dependencies [[cider/piggieback "0.5.2"]
                                   [commons-io/commons-io "2.8.0"]
