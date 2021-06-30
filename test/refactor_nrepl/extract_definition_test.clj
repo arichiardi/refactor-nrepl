@@ -7,8 +7,11 @@
   [name line col]
   (get-in (extract-definition
            {:file (.getAbsolutePath (io/file "test-resources/extract_definition.clj"))
-            :ns "resources.extract-definition"
+            :ns "extract-definition"
             :line line
+            ;; silence errors related to tools.analyzer trying to find stuff in refactor-nrepl's own src/ dir, which is mrandersoni-zed.
+            ;; it's a pretty extreme edge case so it seems safe to ignore:
+            :ignore-errors "true"
             :column col
             :name name
             :dir "test-resources"})
@@ -74,7 +77,7 @@
 (deftest returns-meta-data
   (let [res (extract-definition
              {:file (.getAbsolutePath (io/file "test-resources/extract_definition.clj"))
-              :ns "resources.extract-definition"
+              :ns "extract-definition"
               :line 44
               :column 14
               :name "if-let-bound"
