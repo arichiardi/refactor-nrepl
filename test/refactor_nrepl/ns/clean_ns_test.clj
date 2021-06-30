@@ -57,9 +57,10 @@
 (def ns-with-npm-strs-clean (clean-msg "test-resources/ns_with_npm_strs_clean.cljs"))
 
 (deftest combines-requires
-  (let [requires (core/get-ns-component (clean-ns ns2) :require)
+  (let [prefix-requires (config/with-config {:prefix-rewriting true}
+                          (core/get-ns-component (clean-ns ns2) :require))
         combined-requires (core/get-ns-component ns2-cleaned :require)]
-    (is (= combined-requires requires))))
+    (is (= combined-requires prefix-requires))))
 
 (deftest meta-preserved
   (let [cleaned (pprint-ns (clean-ns ns2-meta))]
@@ -67,8 +68,7 @@
       :doc \"test ns with meta\"}"))))
 
 (deftest rewrites-use-to-require
-  (let [requires (core/get-ns-component (clean-ns ns2) :use)
-        combined-requires (core/get-ns-component ns2-cleaned :require)]
+  (let [combined-requires (core/get-ns-component ns2-cleaned :require)]
     (is (reduce
          #(or %1 (= %2 '[clojure
                          [edn :refer :all :rename {read-string rs}]
@@ -80,15 +80,16 @@
          (tree-seq sequential? identity combined-requires)))))
 
 (deftest keeps-clause-with-rename
-  (let [requires (core/get-ns-component (clean-ns ns2) :use)
-        combined-requires (core/get-ns-component ns2-cleaned :require)]
+  (let [combined-requires (core/get-ns-component ns2-cleaned :require)]
     (is (reduce
          #(or %1 (= %2 '[edn :refer :all :rename {read-string rs}]))
          false
          (tree-seq sequential? identity combined-requires)))))
 
 (deftest test-sort-and-prefix-favoring
-  (let [requires (core/get-ns-component (clean-ns ns1) :require)
+  (let [requires (core/get-ns-component
+                  (config/with-config {:prefix-rewriting true}
+                    (clean-ns ns1)) :require)
         imports (core/get-ns-component (clean-ns ns1) :import)
         sorted-requires (core/get-ns-component ns1-cleaned :require)
         sorted-imports (core/get-ns-component ns1-cleaned :import)]
@@ -127,13 +128,18 @@
          false
          (tree-seq sequential? identity requires)))))
 
-(deftest combines-multiple-refers-to-all
-  (let [requires (clean-ns ns2)
-        instant '[instant :refer :all]]
-    (is (reduce
-         #(or %1 (= %2 instant))
-         false
-         (tree-seq sequential? identity requires)))))
+(deftest combines-multiple-refer-alls
+  (let [[_ & libspecs] (core/get-ns-component (clean-ns ns2) :require)
+        instant '[clojure.instant :refer :all]]
+    (is (= (:count (reduce
+                    (fn [acc libspec]
+                      (if (= libspec instant)
+                        (update acc :count inc)
+                        acc))
+                    {:count 0}
+                    libspecs))
+           1)
+        "Exactly one libspec present for duplicated :refer :all clause")))
 
 (deftest removes-unused-dependencies
   (let [new-ns (clean-ns ns-with-unused-deps)
@@ -144,25 +150,29 @@
     (is (= clean-requires requires))
     (is (= clean-imports imports))))
 
-(def artifact-ns '(ns refactor-nrepl.artifacts
-                    (:require [clojure
-                               [edn :as edn]
-                               [string :as str]]
-                              [clojure.data.json :as json]
-                              [clojure.java.io :as io]
-                              [nrepl
-                               [middleware :refer [set-descriptor!]]
-                               [misc :refer [response-for]]
-                               [transport :as transport]]
-                              [org.httpkit.client :as http]
-                              [refactor-nrepl.externs :refer [add-dependencies]])
-                    (:import java.util.Date)))
+(def artifact-ns
+  '(ns refactor-nrepl.artifacts
+     (:require
+      [clojure
+       [edn :as edn]
+       [string :as str]]
+      [clojure.data.json :as json]
+      [clojure.java.io :as io]
+      [nrepl
+       [middleware :refer [set-descriptor!]]
+       [misc :refer [response-for]]
+       [transport :as transport]]
+      [org.httpkit.client
+       :as very-very-very-very-long-alias-causing-line-wrap]
+      [refactor-nrepl.externs :refer [add-dependencies]])
+     (:import java.util.Date)))
 
 (deftest test-pprint-artifact-ns
-  (are [setting filename] (let [actual (config/with-config {:insert-newline-after-require setting}
-                                         (pprint-ns (with-meta artifact-ns nil)))
-                                expected (-> filename File. .getAbsolutePath slurp)]
-                            (= expected actual))
+  (are [setting filename]
+       (let [actual (config/with-config {:insert-newline-after-require setting}
+                      (pprint-ns (with-meta artifact-ns nil)))
+             expected (-> filename File. .getAbsolutePath slurp)]
+         (= expected actual))
     true  "test-resources/artifacts_pprinted"
     false "test-resources/artifacts_pprinted_traditional_newline"))
 
@@ -192,7 +202,8 @@
          cljc-ns-same-clj-cljs-cleaned)))
 
 (deftest respects-no-prune-option
-  (config/with-config {:prune-ns-form false}
+  (config/with-config {:prune-ns-form false
+                       :prefix-rewriting true}
     (let [new-require (core/get-ns-component (clean-ns ns3) :require)
           expected-require (core/get-ns-component ns3-rebuilt :require)]
       (is (= expected-require new-require)))))
@@ -200,13 +211,14 @@
 (deftest does-not-remove-ns-with-rename
   (is (= (nthrest ns-with-rename-cleaned 2) (nthrest (clean-ns ns-with-rename) 2))))
 
-;; Order of stuff in maps aren't stable across versions which messes
-;; with pretty-printing
-(when (= (clojure-version) "1.7.0")
-  (deftest test-pprint
-    (let [ns-str (pprint-ns (clean-ns ns1))
-          ns1-str (slurp (.getAbsolutePath (File. "test-resources/ns1_cleaned_and_pprinted")))]
-      (is (= ns1-str ns-str)))))
+(deftest test-pprint
+  (let [ns-str (pprint-ns (clean-ns ns1))
+        ns1-str (slurp "test-resources/ns1_cleaned_and_pprinted")
+        ns1-prefix-notation (slurp "test-resources/ns1_cleaned_and_pprinted_prefix_notation")]
+    (is (= ns1-str ns-str))
+    (is (= ns1-prefix-notation (config/with-config
+                                 {:prefix-rewriting true}
+                                 (pprint-ns (clean-ns ns1)))))))
 
 (deftest preserves-shorthand-meta
   (let [cleaned (pprint-ns (clean-ns ns-with-shorthand-meta))]
@@ -223,9 +235,10 @@
     (is (= expected actual))))
 
 (deftest preserves-all-meta
-  (let [actual (pprint-ns (clean-ns ns-with-lots-of-meta))
-        expected (slurp (:path ns-with-lots-of-meta-clean))]
-    (is (= expected actual))))
+  (config/with-config {:prefix-rewriting false}
+    (let [actual (pprint-ns (clean-ns ns-with-lots-of-meta))
+          expected (slurp (:path ns-with-lots-of-meta-clean))]
+      (is (= expected actual)))))
 
 (deftest does-not-remove-dollar-sign-if-valid-symbol
   (let [cleaned (pprint-ns (clean-ns ns-using-dollar))]
