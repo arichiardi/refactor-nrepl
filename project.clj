@@ -4,7 +4,7 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [^:inline-dep [cheshire "5.10.0"]
-                 ^:inline-dep [cider/orchard "0.6.5"]
+                 ^:inline-dep [cider/orchard "0.7.1"]
                  ^:inline-dep [clj-commons/fs "1.6.307"]
                  ^:inline-dep [cljfmt "0.7.0"]
                  ^:inline-dep [http-kit "2.5.1"]
@@ -51,6 +51,7 @@
                                   [org.clojure/clojurescript "1.9.946"]]
                    :repl-options {:nrepl-middleware [cider.piggieback/wrap-cljs-repl]}
                    :java-source-paths ["java-test"]
+                   :jvm-opts ["-Dorchard.use-dynapath=false"]
                    :resource-paths ["test-resources"
                                     "testproject/src"]
                    :repositories [["snapshots" "https://oss.sonatype.org/content/repositories/snapshots"]]}
