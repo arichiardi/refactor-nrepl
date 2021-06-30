@@ -1,4 +1,4 @@
-(ns resources.ns-with-npm-strs
+(ns ns-with-npm-strs
   (:require ["react-native" :as rn]
             [clojure.string :as str]
             ["@react-native-community/async-storage" :as async-storage]

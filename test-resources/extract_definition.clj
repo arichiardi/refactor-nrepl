@@ -1,4 +1,4 @@
-(ns resources.extract-definition)
+(ns extract-definition)
 
 (defn- private-function-definition-with-docstring-and-meta
   "docstring"

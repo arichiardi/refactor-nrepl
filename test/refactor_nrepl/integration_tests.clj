@@ -31,10 +31,10 @@
 (use-fixtures :once wrap-setup-once)
 
 (defmacro with-testproject-on-classpath
-  "redef refactor-nrepl.core/dirs-on-classpath to point to test/resources/testproject which is also made available as test-project-dir"
+  "redef refactor-nrepl.core/dirs-on-classpath to point to test-resources/testproject which is also made available as test-project-dir"
   [& body]
-  `(with-redefs [refactor-nrepl.core/dirs-on-classpath (fn [] [(io/file "test/resources/testproject")])]
-     (let [~'test-project-dir "test/resources/testproject"]
+  `(with-redefs [refactor-nrepl.core/dirs-on-classpath (fn [] [(io/file "test-resources/testproject")])]
+     (let [~'test-project-dir "test-resources/testproject"]
        ~@body)))
 
 (deftest test-find-two-foo

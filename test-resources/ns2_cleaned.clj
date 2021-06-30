@@ -1,4 +1,4 @@
-(ns resources.ns2-cleaned
+(ns ns2-cleaned
   (:require
    [clojure
     [edn :refer :all :rename {read-string rs}]

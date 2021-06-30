@@ -1,4 +1,4 @@
-(ns resources.cljsns
+(ns cljsns
   (:require [cljs.pprint :as pprint]
             [cljs.test :refer-macros [deftest is]]
             cljsjs.js-yaml

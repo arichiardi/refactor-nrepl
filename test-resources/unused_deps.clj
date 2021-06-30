@@ -1,4 +1,4 @@
-(ns resources.unused-deps
+(ns unused-deps
   (:require [clojure edn instant
              [string :as str :refer [join]]]
             [clojure.test :refer :all])

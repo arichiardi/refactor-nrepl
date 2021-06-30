@@ -6,12 +6,12 @@
 (defn- -extract-definition
   [name line col]
   (get-in (extract-definition
-           {:file (.getAbsolutePath (io/file "test/resources/extract_definition.clj"))
+           {:file (.getAbsolutePath (io/file "test-resources/extract_definition.clj"))
             :ns "resources.extract-definition"
             :line line
             :column col
             :name name
-            :dir "test/resources"})
+            :dir "test-resources"})
           [:definition :definition]))
 
 (deftest extracts-private-function-definitition-with-docstring-and-meta
@@ -73,7 +73,7 @@
 
 (deftest returns-meta-data
   (let [res (extract-definition
-             {:file (.getAbsolutePath (io/file "test/resources/extract_definition.clj"))
+             {:file (.getAbsolutePath (io/file "test-resources/extract_definition.clj"))
               :ns "resources.extract-definition"
               :line 44
               :column 14
