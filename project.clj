@@ -17,6 +17,7 @@
                  ^:inline-dep [version-clj "1.0.0"]]
   :exclusions [org.clojure/clojure] ; see versions matrix below
 
+  :pedantic? :abort
   :deploy-repositories [["clojars" {:url "https://clojars.org/repo"
                                     :username :env/clojars_username
                                     :password :env/clojars_password
@@ -28,15 +29,13 @@
   :filespecs [{:type :bytes :path "refactor-nrepl/refactor-nrepl/project.clj" :bytes ~(slurp "project.clj")}]
   :profiles {;; Clojure versions matrix
              :provided {:dependencies [[cider/cider-nrepl "0.25.9"]
-                                       [org.clojure/clojure "1.9.0"]]}
-             :1.8 {:dependencies [[org.clojure/clojure "1.8.0"]
-                                  [org.clojure/clojurescript "1.8.51"]
-                                  [javax.xml.bind/jaxb-api "2.3.1"]]}
-             :1.9 {:dependencies [[org.clojure/clojure "1.9.0"]
-                                  [org.clojure/clojurescript "1.9.946"]
-                                  [javax.xml.bind/jaxb-api "2.3.1"]]}
-             :1.10 {:dependencies [[org.clojure/clojure "1.10.2"]
-                                   [org.clojure/clojurescript "1.10.520"]]}
+                                       [org.clojure/clojure "1.9.0"]
+                                       ;; For pedantic:
+                                       [com.google.code.findbugs/jsr305 "3.0.2"]
+                                       [com.google.errorprone/error_prone_annotations "2.1.3"]]}
+             :1.8 {:dependencies [[org.clojure/clojure "1.8.0"]]}
+             :1.9 {:dependencies [[org.clojure/clojure "1.9.0"]]}
+             :1.10 {:dependencies [[org.clojure/clojure "1.10.2"]]}
 
              :master {:repositories [["snapshots"
                                       "https://oss.sonatype.org/content/repositories/snapshots"]]
@@ -48,7 +47,8 @@
              :dev {:global-vars {*warn-on-reflection* true}
                    :dependencies [[cider/piggieback "0.5.2"]
                                   [commons-io/commons-io "2.8.0"]
-                                  [org.clojure/clojurescript "1.9.946"]]
+                                  [org.clojure/clojurescript "1.10.520"]
+                                  [javax.xml.bind/jaxb-api "2.3.1"]]
                    :repl-options {:nrepl-middleware [cider.piggieback/wrap-cljs-repl]}
                    :java-source-paths ["java-test"]
                    :jvm-opts ["-Dorchard.use-dynapath=false"]
