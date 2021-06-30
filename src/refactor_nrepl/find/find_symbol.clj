@@ -121,13 +121,14 @@
                               :col-beg column
                               :col-end end-column})))))
         gather (fn [info]
-                 (merge info
-                        {:file (.getCanonicalPath file)
-                         :name fully-qualified-name
-                         :match (match file-content
-                                  (:line-beg info)
-                                  (:line-end  info))}))]
-    (map gather locs)))
+                 (some-> info
+                         (merge
+                          {:file  (.getCanonicalPath file)
+                           :name  fully-qualified-name
+                           :match (match file-content
+                                         (:line-beg info)
+                                         (:line-end  info))})))]
+    (keep gather locs)))
 
 (defn- find-global-symbol [file ns var-name ignore-errors]
   (let [namespace (or ns (core/ns-from-string (slurp file)))
