@@ -81,9 +81,9 @@
        most-likely-root
        (loop [f start]
          (cond
-           (root-dir? f) f
+           (root-dir? f)        f
            (nil? (fs/parent f)) nil
-           :else (recur (fs/parent f))))))))
+           :else                (recur (fs/parent f))))))))
 
 (defn build-artifact? [path-or-file]
   (let [f (io/file path-or-file)
@@ -175,11 +175,11 @@
   [path-or-file]
   (let [f (io/file path-or-file)]
     (cond
-      (clj-file? f) :clj
+      (clj-file? f)  :clj
       (cljs-file? f) :cljs
       (cljc-file? f) :cljc
-      :else (throw (ex-info "Path isn't pointing to file in a clj dialect!"
-                            {:path path-or-file})))))
+      :else          (throw (ex-info "Path isn't pointing to file in a clj dialect!"
+                                     {:path path-or-file})))))
 
 (defn find-in-project
   "Return the files in the project satisfying (pred ^File file)."
@@ -301,7 +301,7 @@
                     (PushbackReader.)
                     parse/read-ns-decl)
         ns-meta (meta (second ns-form))]
-    {:top-level-meta ns-meta
+    {:top-level-meta  ns-meta
      :gc-methods-meta (extract-gen-class-methods-meta ns-form)}))
 
 (defn read-ns-form-with-meta
@@ -329,6 +329,7 @@
                        (require n)
                        (find-ns n))
                      (catch Exception e
+                       (-> e .printStackTrace)
                        (when-not no-error
                          (throw e))))))
 

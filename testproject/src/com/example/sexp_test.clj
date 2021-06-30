@@ -1,4 +1,4 @@
-(ns testproject.src.com.example.sexp-test)
+(ns com.example.sexp-test)
 
 (defn foo []
   (let [some :bindings

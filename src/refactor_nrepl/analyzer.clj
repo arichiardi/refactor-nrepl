@@ -85,7 +85,11 @@
     (when ns
       (if-let [cached-ast-or-err (get-ast-from-cache ns file-content)]
         cached-ast-or-err
-        (when-let [new-ast-or-err (try (build-ast ns aliases) (catch Throwable th th))]
+        (when-let [new-ast-or-err (try
+                                    (build-ast ns aliases)
+                                    (catch Throwable th
+                                      (-> th .printStackTrace)
+                                      th))]
           (update-ast-cache file-content ns new-ast-or-err))))))
 
 (defn- throw-ast-in-bad-state
@@ -125,7 +129,8 @@
   (doseq [f (tracker/project-files-in-topo-order)]
     (try
       (ns-ast (slurp f))
-      (catch Throwable _th))) ;noop, ast-status will be reported separately
+      (catch Throwable _th
+        (-> _th .printStackTrace)))) ;noop, ast-status will be reported separately
   (ast-stats))
 
 (defn node-at-loc? [^long loc-line ^long loc-column node]

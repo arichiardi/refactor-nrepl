@@ -62,8 +62,8 @@
     :loc   Classpath entry (directory or jar) on which the class is located
     :file  Path of the class file, relative to :loc"
   (fn [^File f _]
-    (cond (.isDirectory f) :dir
-          (jar? f) :jar
+    (cond (.isDirectory f)           :dir
+          (jar? f)                   :jar
           (class-file? (.getName f)) :class)))
 
 (defmethod path-class-files :default [& _] [])
@@ -121,18 +121,18 @@
         (all-classpath-entries)))
 
 (def available-classes
-  (get-available-classes))
+  (delay (get-available-classes)))
 
 (defn- get-available-classes-by-last-segment
   []
   (delay
-   (group-by #(symbol (peek (string/split (str %) #"\."))) available-classes)))
+   (group-by #(symbol (peek (string/split (str %) #"\."))) @available-classes)))
 
 (def available-classes-by-last-segment
-  (get-available-classes-by-last-segment))
+  (delay (get-available-classes-by-last-segment)))
 
 (defn reset
   "Reset the cache of classes"
   []
-  (alter-var-root #'available-classes (constantly (get-available-classes)))
-  (alter-var-root #'available-classes-by-last-segment (constantly (get-available-classes-by-last-segment))))
+  (alter-var-root #'available-classes (constantly (delay (get-available-classes))))
+  (alter-var-root #'available-classes-by-last-segment (constantly (delay (get-available-classes-by-last-segment)))))

@@ -85,6 +85,7 @@
        (mapcat #(try
                   (get-macro-definitions-in-file-with-caching %)
                   (catch Exception e
+                    (-> e .printStackTrace)
                     (when-not ignore-errors?
                       (throw e)))))))
 

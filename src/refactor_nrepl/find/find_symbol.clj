@@ -2,6 +2,7 @@
   (:require [clojure
              [set :as set]
              [string :as str]]
+            [refactor-nrepl.ns.resolve-missing]
             [clojure.tools.analyzer.ast :refer [nodes postwalk]]
             [clojure.tools.namespace.parse :as parse]
             [refactor-nrepl
@@ -108,6 +109,7 @@
                        (find-symbol-in-ast fully-qualified-name)
                        (filter :line-beg))
                   (catch Exception e
+                    (-> e .printStackTrace)
                     (when-not ignore-errors
                       (throw e))))
         locs (into
@@ -118,8 +120,8 @@
                     ((fn [{:keys [line column end-line end-column]}]
                        (list {:line-beg line
                               :line-end end-line
-                              :col-beg column
-                              :col-end end-column})))))
+                              :col-beg  column
+                              :col-end  end-column})))))
         gather (fn [{:keys [line-beg line-end] :as info}]
                  (some-> info
                          (merge
@@ -135,7 +137,12 @@
                                (str/join "/" [namespace var-name]))
         referred-syms (libspecs/referred-syms-by-file&fullname)]
     (->> (core/dirs-on-classpath)
-         (mapcat (partial core/find-in-dir (some-fn core/clj-file? core/cljc-file?)))
+         (mapcat (partial core/find-in-dir (every-pred (some-fn core/clj-file? core/cljc-file?)
+                                                       (fn [f]
+                                                         (let [n (core/read-ns-form f)]
+                                                           (if-not n
+                                                             false
+                                                             (not (refactor-nrepl.ns.resolve-missing/invalid? n))))))))
          (mapcat (partial find-symbol-in-file fully-qualified-name ignore-errors referred-syms)))))
 
 (defn- get&read-enclosing-sexps
@@ -211,12 +218,11 @@
                                 first
                                 :name)
             local-occurrences
-            (map #(merge %
-                         {:name var-name
-                          :file (.getCanonicalPath (java.io.File. file))
-                          :match (match file-content
-                                   (:line-beg %)
-                                   (:line-end %))})
+            (map (fn [{:keys [line-beg line-end] :as m}]
+                   (merge m
+                          {:name  var-name
+                           :file  (.getCanonicalPath (java.io.File. file))
+                           :match (match file-content line-beg line-end)}))
                  (find-nodes var-name
                              [top-level-form-ast]
                              #(and (#{:local :binding} (:op %))

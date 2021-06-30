@@ -18,9 +18,9 @@
   (let [info (info 'user sym)]
     (if-let [_clazz (:class info)]
       (cond
-        ((set (:interfaces info)) 'clojure.lang.IType) :type
+        ((set (:interfaces info)) 'clojure.lang.IType)   :type
         ((set (:interfaces info)) 'clojure.lang.IRecord) :type
-        :else :class)                   ; interfaces are included here
+        :else                                            :class)                   ; interfaces are included here
       :ns)))
 
 (defn- collate-type-info
@@ -35,10 +35,17 @@
              {:name candidate :type :class})))
        candidates))
 
-(defn- inlined-dependency? [candidate]
+(defn inlined-dependency? [candidate]
   (or (-> candidate str (.startsWith "deps."))
       (-> candidate str (.startsWith "mranderson"))
       (-> candidate str (.startsWith "eastwood.copieddeps"))))
+
+(defn- refactor-nrepl? [candidate]
+  ;; the r-n impl should never analyse itself w/ t.ana:
+  (and (-> candidate str (.startsWith "refactor-nrepl"))
+       (not (-> candidate str (.contains "test")))))
+
+(def invalid? (some-fn inlined-dependency? refactor-nrepl?))
 
 (defn- ns-publics-cljs [env ns-name]
   (->> ns-name (cljs-ana/public-vars env) keys))
@@ -75,6 +82,6 @@
     (some->> sym
              symbol
              candidates
-             (remove inlined-dependency?)
+             (remove invalid?)
              collate-type-info
              pr-str)))

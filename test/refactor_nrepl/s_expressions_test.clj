@@ -38,7 +38,7 @@
   (t/is (=  "#{foo bar baz}" (sut/get-first-sexp file-content-with-set))))
 
 (t/deftest get-first-sexp
-  (t/is (= "(ns testproject.src.com.example.sexp-test)"
+  (t/is (= "(ns com.example.sexp-test)"
            (sut/get-first-sexp file-content)))
   (t/is (= "(foobar baz)"
            (sut/get-first-sexp file-content-with-uneval))))
