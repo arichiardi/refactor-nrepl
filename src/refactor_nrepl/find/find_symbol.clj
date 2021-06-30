@@ -120,14 +120,12 @@
                               :line-end end-line
                               :col-beg column
                               :col-end end-column})))))
-        gather (fn [info]
+        gather (fn [{:keys [line-beg line-end] :as info}]
                  (some-> info
                          (merge
                           {:file  (.getCanonicalPath file)
                            :name  fully-qualified-name
-                           :match (match file-content
-                                         (:line-beg info)
-                                         (:line-end  info))})))]
+                           :match (match file-content line-beg line-end)})))]
     (keep gather locs)))
 
 (defn- find-global-symbol [file ns var-name ignore-errors]
