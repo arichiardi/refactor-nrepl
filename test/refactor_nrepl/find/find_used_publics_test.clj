@@ -7,8 +7,8 @@
   (.getAbsolutePath (io/file path)))
 
 (def ns2-path (absolute-path "test-resources/ns2.clj"))
-(def macro-usage (absolute-path "test-resources/testproject/src/com/example/referred_macro_usage.clj"))
-(def protocol-usage (absolute-path "test-resources/testproject/src/com/example/protocol_usage.clj"))
+(def macro-usage (absolute-path "testproject/src/com/example/referred_macro_usage.clj"))
+(def protocol-usage (absolute-path "testproject/src/com/example/protocol_usage.clj"))
 
 (deftest finds-symbols-of-ns
   (is (= '("get-pretty-writer" "fresh-line" "cl-format")

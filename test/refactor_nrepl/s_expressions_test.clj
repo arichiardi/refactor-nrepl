@@ -2,7 +2,7 @@
   (:require [refactor-nrepl.s-expressions :as sut]
             [clojure.test :as t]))
 
-(def file-content (slurp "test-resources/testproject/src/com/example/sexp_test.clj"))
+(def file-content (slurp "testproject/src/com/example/sexp_test.clj"))
 (def weird-file-content ";; some weird file
   ;; not even clojure
   ;; perhaps? no parens!")

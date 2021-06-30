@@ -51,7 +51,7 @@
                    :repl-options {:nrepl-middleware [cider.piggieback/wrap-cljs-repl]}
                    :java-source-paths ["java-test"]
                    :resource-paths ["test-resources"
-                                    "test-resources/testproject/src"]
+                                    "testproject/src"]
                    :repositories [["snapshots" "https://oss.sonatype.org/content/repositories/snapshots"]]}
              :cljfmt [:test
                       {:plugins [[lein-cljfmt "0.7.0"]]
