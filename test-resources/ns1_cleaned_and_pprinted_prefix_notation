@@ -1,4 +1,4 @@
-(ns resources.ns1
+(ns ns1
   "This is a docstring for the ns
 
   It contains an \"escaped string\"."

@@ -1,5 +1,5 @@
 (ns ^{:author "Trurl and Klapaucius", :doc "test ns with meta"}
- resources.ns2-meta
+ ns2-meta
   (:require [clojure
              [edn :refer :all :rename {read rd, read-string rs}]
              [instant :refer :all]

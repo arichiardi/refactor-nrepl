@@ -4,8 +4,8 @@
             [cljsjs.js-yaml] ; this one should not be pruned as it contains externs
             [clojure.string :refer [split-lines join]]
             [cljs.pprint :as pprint]
-            [resources.js-literal-ns :as js-literal]
-            [resources.keyword-ns :as kw]
+            [js-literal-ns :as js-literal]
+            [keyword-ns :as kw]
             [clojure.set :as set])
   (:require-macros [cljs.test :refer [testing]]
                    [cljs.analyzer.macros :as am]
