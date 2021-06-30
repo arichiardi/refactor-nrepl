@@ -1,4 +1,4 @@
-(ns resources.ns2
+(ns ns2
   (:require
    [clojure.pprint :refer [fresh-line]]
    [clojure.pprint :refer [get-pretty-writer]]

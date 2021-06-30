@@ -1,4 +1,4 @@
-(ns resources.cljsns
+(ns cljsns
   (:require [cljs.test :refer-macros [is deftest]]
             [cljs.test :refer-macros [is]]
             [cljsjs.js-yaml] ; this one should not be pruned as it contains externs

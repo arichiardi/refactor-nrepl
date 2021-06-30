@@ -1,4 +1,4 @@
-(ns resources.cljcns
+(ns cljcns
   "This is a docstring for the ns"
   {:author "Winnie the pooh"}
   (:refer-clojure :exclude [macroexpand-1 read read-string])

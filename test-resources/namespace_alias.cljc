@@ -1,4 +1,4 @@
-(ns resources.namespace-alias
+(ns namespace-alias
   (:require
    #?@(:cljs
        [[goog.string :as gstr]]

@@ -1,4 +1,4 @@
-(ns resources.ns-with-rename-cleaned
+(ns ns-with-rename-cleaned
   "This is a docstring for the ns
 
   It contains an \"escaped string\"."

@@ -45,15 +45,15 @@
 
              :lein-plugin {:source-paths ["lein-plugin"]}
              :test {:dependencies [[print-foo "1.0.2"]]
-                    :src-paths ["test/resources"]}
+                    :src-paths ["test-resources"]}
              :dev {:global-vars {*warn-on-reflection* true}
                    :dependencies [[cider/piggieback "0.5.2"]
                                   [commons-io/commons-io "2.8.0"]
                                   [org.clojure/clojurescript "1.9.946"]]
                    :repl-options {:nrepl-middleware [cider.piggieback/wrap-cljs-repl]}
-                   :java-source-paths ["test/java"]
-                   :resource-paths ["test/resources"
-                                    "test/resources/testproject/src"]
+                   :java-source-paths ["java-test"]
+                   :resource-paths ["test-resources"
+                                    "test-resources/testproject/src"]
                    :repositories [["snapshots" "https://oss.sonatype.org/content/repositories/snapshots"]]}
              :cljfmt [:test
                       {:plugins [[lein-cljfmt "0.7.0"]]
