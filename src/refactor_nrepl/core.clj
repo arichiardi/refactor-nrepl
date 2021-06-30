@@ -321,7 +321,9 @@
   can't successfully read an ns form."
   ([path] (path->namespace nil path))
   ([no-error path] (try
-                     (some->> path read-ns-form-with-meta second find-ns)
+                     (when-let [n (some-> path read-ns-form-with-meta second)]
+                       (require n)
+                       (find-ns n))
                      (catch Exception e
                        (when-not no-error
                          (throw e))))))
@@ -357,8 +359,9 @@
        (catch Exception _e
          (throw (IllegalArgumentException. "Malformed ns form!")))))))
 
-(defn ^String fully-qualify
+(defn fully-qualify
   "Create a fully qualified name from name and ns."
+  ^String
   [ns name]
   (let [prefix (str ns)
         suffix (suffix name)]
