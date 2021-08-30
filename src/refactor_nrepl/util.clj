@@ -1,5 +1,6 @@
 (ns refactor-nrepl.util
-  (:require [clojure.string :as string])
+  (:require
+   [clojure.string :as string])
   (:import java.util.regex.Pattern))
 
 (defn normalize-to-unix-path
@@ -99,3 +100,21 @@
   ;; in other places that already are using `some-fn`, `every-pred`, etc
   ([_]
    (.isInterrupted (Thread/currentThread))))
+
+(defmacro with-preserved-bindings
+  {:style/indent 0}
+  [& body]
+  `(binding [*assert* *assert*
+             *command-line-args* *command-line-args*
+             *compile-path* *compile-path*
+             *data-readers* *data-readers*
+             *default-data-reader-fn* *default-data-reader-fn*
+             *file* *file*
+             *math-context* *math-context*
+             *ns* *ns*
+             *print-length* *print-length*
+             *print-level* *print-level*
+             *print-meta* *print-meta*
+             *unchecked-math* *unchecked-math*
+             *warn-on-reflection* *warn-on-reflection*]
+     ~@body))
