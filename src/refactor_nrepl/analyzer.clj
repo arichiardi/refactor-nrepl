@@ -88,10 +88,9 @@
                   {:validate/unresolvable-symbol-handler shadow-unresolvable-symbol-handler
                    :validate/throw-on-arity-mismatch     false
                    :validate/wrong-tag-handler           shadow-wrong-tag-handler}}]
-        (util/with-preserved-bindings
-          (binding [ana/macroexpand-1 noop-macroexpand-1
-                    reader/*data-readers* *data-readers*]
-            (assoc-in (aj/analyze-ns ns (aj/empty-env) opts) [0 :alias-info] aliases)))))))
+        (binding [ana/macroexpand-1 noop-macroexpand-1
+                  reader/*data-readers* *data-readers*]
+          (assoc-in (aj/analyze-ns ns (aj/empty-env) opts) [0 :alias-info] aliases))))))
 
 (defn- cachable-ast [file-content]
   (let [[ns aliases] (parse-ns file-content)]
