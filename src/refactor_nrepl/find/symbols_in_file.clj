@@ -1,13 +1,12 @@
 (ns refactor-nrepl.find.symbols-in-file
-  (:require [clojure
-             [walk :as walk]]
-            [clojure.tools.reader :as reader]
-            [clojure.tools.reader.reader-types :as readers]
-            [refactor-nrepl
-             [core :as core]
-             [util :as util]]
-            [refactor-nrepl.ns.ns-parser :as ns-parser]
-            [clojure.java.io :as io]))
+  (:require
+   [clojure.java.io :as io]
+   [clojure.tools.reader :as reader]
+   [clojure.tools.reader.reader-types :as readers]
+   [clojure.walk :as walk]
+   [refactor-nrepl.core :as core]
+   [refactor-nrepl.ns.ns-parser :as ns-parser]
+   [refactor-nrepl.util :as util]))
 
 (defn- find-symbol-ns [{:keys [:require :require-macros]} sym]
   (some->> (into require require-macros)
@@ -40,6 +39,23 @@
       (dissoc :line :column :end-line :end-column)
       not-empty))
 
+(defn- to-symbol [x]
+  (cond
+    (var? x) (if (core/clojure-version->=? {:major 1 :minor 10})
+               ;; choose the most accurate method when available:
+               (symbol x)
+               (-> x meta :name))
+    (class? x) (-> ^Class x .getName symbol)
+    true (assert false "Expected `ns-resolve` to only return vars or classes.")))
+
+(defn- also-ns-resolve
+  "Turns e.g. `Connection` into also `java.sql.Connection`."
+  [sym]
+  (let [resolved (ns-resolve *ns* sym)]
+    (cond-> [sym]
+      ;; only for classes - else symbols-in-file can return false positives:
+      (class? resolved) (conj (to-symbol resolved)))))
+
 (defn symbols-in-file
   "Return a set of all the symbols occurring in the file at path.
 
@@ -48,7 +64,7 @@
 
   Note: Because it was convenient at the time this function also
   returns fully qualified keywords mapped to symbol.  This means that
-  if the file contains `:prefix/kw` the symbol
+  if the file contains `::prefix/kw`, the symbol
   `fully.resolved.prefix/kw` is included in the set.
 
   Dialect defaults to :clj."
@@ -59,7 +75,7 @@
            cljs? (= dialect :cljs)
            file-ns (or (when-let [s (-> parsed-ns :ns symbol)]
                          (when-not cljs?
-                           (core/safe-find-ns s :ignore-errors)))
+                           (core/safe-the-ns s :ignore-errors)))
                        *ns*)
            ns-aliases (if cljs?
                         (ns-parser/aliases
@@ -99,7 +115,12 @@
                (when (not= form :eof)
                  (walk/prewalk collect-symbols form)
                  (recur (reader/read rdr-opts rdr))))
-             (->> @syms
-                  (map
-                   (partial fix-ns-of-backquoted-symbols (dialect parsed-ns)))
-                  set))))))))
+             (cond->> @syms
+               true
+               (map (partial fix-ns-of-backquoted-symbols (dialect parsed-ns)))
+
+               (= dialect :clj)
+               (mapcat also-ns-resolve)
+
+               true
+               set))))))))

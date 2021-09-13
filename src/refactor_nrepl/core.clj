@@ -1,15 +1,17 @@
 (ns refactor-nrepl.core
-  (:require [clojure.java.io :as io]
-            [clojure.string :as str]
-            [clojure.tools.namespace.parse :as parse]
-            [clojure.tools.reader.reader-types :as readers]
-            [orchard.java.classpath :as cp]
-            [orchard.misc :as misc]
-            [me.raynes.fs :as fs]
-            [refactor-nrepl.util :as util :refer [normalize-to-unix-path]]
-            [refactor-nrepl.s-expressions :as sexp]
-            [refactor-nrepl.config :as config])
-  (:import [java.io File FileReader PushbackReader StringReader]))
+  (:require
+   [clojure.java.io :as io]
+   [clojure.string :as str]
+   [clojure.tools.namespace.parse :as parse]
+   [clojure.tools.reader.reader-types :as readers]
+   [me.raynes.fs :as fs]
+   [orchard.java.classpath :as cp]
+   [orchard.misc :as misc]
+   [refactor-nrepl.config :as config]
+   [refactor-nrepl.s-expressions :as sexp]
+   [refactor-nrepl.util :as util :refer [normalize-to-unix-path]])
+  (:import
+   (java.io File FileReader PushbackReader StringReader)))
 
 (defn version []
   (let [v (-> (or (io/resource "refactor-nrepl/refactor-nrepl/project.clj")
@@ -331,7 +333,9 @@
 
 (def require-lock (Object.))
 
-(defn safe-find-ns [n ignore-error?]
+(defn safe-the-ns
+  "Like `#'the-ns` but safer."
+  [n ignore-error?]
   (try
     (locking require-lock
       (require n))
@@ -349,7 +353,7 @@
   can't successfully read an ns form."
   ([path] (path->namespace nil path))
   ([no-error path] (when-not (cljs-file? path)
-                     (some-> path read-ns-form-with-meta parse/name-from-ns-decl (safe-find-ns no-error)))))
+                     (some-> path read-ns-form-with-meta parse/name-from-ns-decl (safe-the-ns no-error)))))
 
 (defn file-content-sans-ns
   "Read the content of file after the ns.
@@ -402,13 +406,17 @@
   (when (prefix symbol-or-keyword)
     symbol-or-keyword))
 
+(defn clojure-version->=?
+  [{:keys [major minor] :as _clojure-version}]
+  (let [major (long major)
+        minor (long minor)]
+    (or (> (-> *clojure-version* :major long) major)
+        (and (= (-> *clojure-version* :major long) major)
+             (>= (-> *clojure-version* :minor long) minor)))))
+
 (defmacro with-clojure-version->=
   "Guard the evaluation of `body` with a test on the current clojure version."
   {:style/indent 1}
-  [{:keys [major minor] :as _clojure-version} & body]
-  (let [major (long major)
-        minor (long minor)]
-    (when (or (> (-> *clojure-version* :major long) major)
-              (and (= (-> *clojure-version* :major long) major)
-                   (>= (-> *clojure-version* :minor long) minor)))
-      `(do ~@body))))
+  [clojure-version & body]
+  (when (clojure-version->=? clojure-version)
+    `(do ~@body)))
