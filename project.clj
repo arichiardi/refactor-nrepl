@@ -8,11 +8,11 @@
                  ^:inline-dep [org.clojure/data.json "2.3.1"]
                  ^:inline-dep [org.clojure/tools.analyzer.jvm "1.1.0"]
                  ^:inline-dep [org.clojure/tools.namespace "1.1.0" :exclusions [org.clojure/tools.reader]]
-                 ^:inline-dep [org.clojure/tools.reader "1.3.5"]
-                 ^:inline-dep [cider/orchard "0.7.1"]
-                 ^:inline-dep [cljfmt "0.7.0"]
+                 ^:inline-dep [org.clojure/tools.reader "1.3.6"]
+                 ^:inline-dep [cider/orchard "0.7.3"]
+                 ^:inline-dep [cljfmt "0.8.0" :exclusions [rewrite-clj rewrite-cljs]]
                  ^:inline-dep [clj-commons/fs "1.6.307"]
-                 ^:inline-dep [rewrite-clj "0.6.1"]
+                 ^:inline-dep [rewrite-clj "1.0.699-alpha"]
                  ^:inline-dep [version-clj "1.0.0"]]
   :exclusions [org.clojure/clojure] ; see versions matrix below
 
@@ -56,7 +56,7 @@
                                     "testproject/src"]
                    :repositories [["snapshots" "https://oss.sonatype.org/content/repositories/snapshots"]]}
              :cljfmt [:test
-                      {:plugins [[lein-cljfmt "0.7.0" :exclusions [org.clojure/clojure
+                      {:plugins [[lein-cljfmt "0.8.0" :exclusions [org.clojure/clojure
                                                                    org.clojure/clojurescript]]]
                        :cljfmt {:indents {as-> [[:inner 0]]
                                           as->* [[:inner 0]]
