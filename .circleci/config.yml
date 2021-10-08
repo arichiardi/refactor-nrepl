@@ -139,7 +139,7 @@ jobs:
                 command: make jar
             - run:
                 name: Verify that jarring includes the plugin
-                command: zipinfo -1 target/refactor-nrepl-*.jar | grep --silent "refactor_nrepl/plugin.clj"
+                command: grep --silent "refactor_nrepl/plugin.clj" <(zipinfo -1 target/refactor-nrepl-*.jar)
 
 ######################################################################
 #
